@@ -1,4 +1,3 @@
-import logo from './logo.png';
 import './App.css';
 import { Provider, useDispatch } from 'react-redux';
 import { store } from './redux/store';
