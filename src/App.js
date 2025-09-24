@@ -1,6 +1,5 @@
 import './App.css';
-import { Provider, useDispatch } from 'react-redux';
-import { store } from './redux/store';
+import { useDispatch } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 import { authRoutes, routes } from './routes';
 import AppLayout from './Layouts/AppLayout';

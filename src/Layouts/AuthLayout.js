@@ -1,9 +1,8 @@
-import React from 'react'
+
 import { Outlet } from 'react-router-dom'
 import { Col, Container, Row } from 'reactstrap'
 
-
-const AuthLayout = ({}) => {
+const AuthLayout = () => {
   return (
     <div className="auth-layout">
       <Container fluid className="auth-container">
