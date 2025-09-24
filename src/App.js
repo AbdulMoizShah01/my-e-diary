@@ -1,24 +1,77 @@
-import logo from './logo.svg';
+import logo from './logo.png';
 import './App.css';
+import { Provider, useDispatch } from 'react-redux';
+import { store } from './redux/store';
+import { Route, Routes } from 'react-router-dom';
+import { authRoutes, routes } from './routes';
+import AppLayout from './Layouts/AppLayout';
+import { useEffect, useState } from 'react';
+import AuthLayout from './Layouts/AuthLayout';
+import firebaseSDK from './firebase/firebase.config';
+import SplashScreen from './Pages/SplashScreen';
+import { setUser } from './redux/actions';
+import getInitialStates from './initialStates';
+import RouteNotFound from './components/specials/RouteNotFound';
 
 function App() {
+
+const [user, setuser]= useState("check-state");
+const dispatch=useDispatch();
+
+
+const checkAuth=async(res)=>{
+   if(res?.uid){
+     let userId =res.uid;
+            let user = (await firebaseSDK.firestore.collection("Users").doc(userId).get()).data();
+            console.log("firebase user",user)
+          setuser(user);
+          dispatch(setUser(user));
+          getInitialStates(dispatch,user);
+        
+
+
+   }
+  else {
+     setuser(null);
+  }
+}
+
+console.log("user",user);
+
+useEffect(()=>{
+  firebaseSDK.auth.onAuthStateChanged((res)=>{
+   checkAuth(res)
+  })
+},[])
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  
+      <div className="App">
+           <Routes>
+       { user==="check-state"?<Route path='*' element={<SplashScreen/>}/>:
+        user?._id? <Route path='/' element={<AppLayout onLogout={()=>setuser(null)}/>}>
+         {routes?.map((item,index)=>{
+          let Component=item?.Component;
+          return (<Route key={item?.path} path={item.path} element={<Component/>}/>)
+
+         })}
+         <Route path='*' element={<RouteNotFound/>}/>
+        </Route>:<Route path='/' element={<AuthLayout/>}>
+        {authRoutes?.map((item,index)=>{
+          let Component = item?.Component;
+          return(<Route key={item?.path} path={item.path} element={<Component  onAuthSuccess={(u)=>{
+            console.log("User-Logged in",u);
+            setUser(u)
+          }}/>}/>)
+        })}
+        </Route>
+       }
+    <Route path='*' element={<RouteNotFound/>}/>
+      </Routes>
+      </div>
+   
   );
 }
 
