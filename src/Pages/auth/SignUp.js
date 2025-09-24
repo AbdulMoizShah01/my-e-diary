@@ -62,16 +62,17 @@ const Signup = () => {
       
       const user = auth.currentUser;
 
-      if (user) {
-        await setDoc(doc(firebaseSDK.firestore, "Users", user.uid), {
-          _id: user.uid,
-          email: formData.email,        
-          firstName: formData.fname,
-          lastName: formData.lname,
-          role: "User",
-          createdAt: Date.parse(new Date())
-        });
-      }
+     if (user) {
+  await setDoc(doc(firebaseSDK.firestore, "Users", user.uid), {
+    _id: user.uid,
+    email: formData.email,        
+    firstName: formData.fname,
+    lastName: formData.lname,
+    role: "User",
+    createdAt: Date.parse(new Date())
+  });
+}
+
       
       toast.success("Account created successfully!");
       navigate("/");
