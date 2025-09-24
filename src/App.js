@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 import { authRoutes, routes } from './routes';
 import AppLayout from './Layouts/AppLayout';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AuthLayout from './Layouts/AuthLayout';
 import firebaseSDK from './firebase/firebase.config';
 import SplashScreen from './Pages/SplashScreen';
@@ -12,64 +12,77 @@ import getInitialStates from './initialStates';
 import RouteNotFound from './components/specials/RouteNotFound';
 
 function App() {
-
-const [user, setuser]= useState("check-state");
-const dispatch=useDispatch();
-
-
-const checkAuth=async(res)=>{
-   if(res?.uid){
-     let userId =res.uid;
-            let user = (await firebaseSDK.firestore.collection("Users").doc(userId).get()).data();
-            console.log("firebase user",user)
-          setuser(user);
-          dispatch(setUser(user));
-          getInitialStates(dispatch,user);
-        
+  const [user, setuser] = useState("check-state");
+  const dispatch = useDispatch();
 
 
-   }
-  else {
-     setuser(null);
+const checkAuth = useCallback(async (res) => {
+  if (res?.uid) {
+    let userId = res.uid;
+    let userData = (
+      await firebaseSDK.firestore.collection("Users").doc(userId).get()
+    ).data();
+    console.log("firebase user", userData);
+    setuser(userData);
+    dispatch(setUser(userData));
+    getInitialStates(dispatch, userData);
+  } else {
+    setuser(null);
   }
-}
+}, [dispatch]);
 
-console.log("user",user);
-
-useEffect(()=>{
-  firebaseSDK.auth.onAuthStateChanged((res)=>{
-   checkAuth(res)
-  })
-},[])
-
-
+ useEffect(() => {
+  const unsubscribe = firebaseSDK.auth.onAuthStateChanged((res) => {
+    checkAuth(res);
+  });
+  return unsubscribe;
+}, [checkAuth]);
 
   return (
-  
-      <div className="App">
-           <Routes>
-       { user==="check-state"?<Route path='*' element={<SplashScreen/>}/>:
-        user?._id? <Route path='/' element={<AppLayout onLogout={()=>setuser(null)}/>}>
-         {routes?.map((item,index)=>{
-          let Component=item?.Component;
-          return (<Route key={item?.path} path={item.path} element={<Component/>}/>)
-
-         })}
-         <Route path='*' element={<RouteNotFound/>}/>
-        </Route>:<Route path='/' element={<AuthLayout/>}>
-        {authRoutes?.map((item,index)=>{
-          let Component = item?.Component;
-          return(<Route key={item?.path} path={item.path} element={<Component  onAuthSuccess={(u)=>{
-            console.log("User-Logged in",u);
-            setUser(u)
-          }}/>}/>)
-        })}
-        </Route>
-       }
-    <Route path='*' element={<RouteNotFound/>}/>
+    <div className="App">
+      <Routes>
+        {user === "check-state" ? (
+          <Route path="*" element={<SplashScreen />} />
+        ) : user?._id ? (
+          <Route path="/" element={<AppLayout onLogout={() => setuser(null)} />}>
+            {routes?.map((item) => {
+              let Component = item?.Component;
+              return (
+                <Route
+                  key={item?.path}
+                  path={item.path}
+                  element={<Component />}
+                />
+              );
+            })}
+            <Route path="*" element={<RouteNotFound />} />
+          </Route>
+        ) : (
+          <Route path="/" element={<AuthLayout />}>
+            {authRoutes?.map((item) => {
+              let Component = item?.Component;
+              return (
+                <Route
+                  key={item?.path}
+                  path={item.path}
+                  element={
+                    <Component
+                      onAuthSuccess={(u) => {
+                        console.log("User-Logged in", u);
+                        setuser(u);           // ✅ fixed
+                        dispatch(setUser(u));
+                      }}
+                    />
+                  }
+                />
+              );
+            })}
+          </Route>
+        )}
+        {/* only keep one RouteNotFound */}
+        <Route path="*" element={<RouteNotFound />} />
       </Routes>
-      </div>
-   
+    </div>
   );
 }
 
