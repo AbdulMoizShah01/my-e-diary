@@ -16,7 +16,6 @@ export const routes=[
 ]
 
 export const authRoutes =[
-    {path: "/", Component: SignIn},
     {path: "/sign-in", Component: SignIn},
     {path: "/sign-up", Component: SignUp},
     
