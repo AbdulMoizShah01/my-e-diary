@@ -4,23 +4,23 @@ const SplashScreen = ({ onFinish }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect(() => {
-  //   // Simulate loading process
-  //   const loadingTimer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 2500);
+  useEffect(() => {
+    // Simulate loading process
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
 
-  //   // Auto-close after 3.5 seconds
-  //   const closeTimer = setTimeout(() => {
-  //     setIsVisible(false);
-  //     setTimeout(() => onFinish(), 500);
-  //   }, 3500);
+    // Auto-close after 3.5 seconds
+    const closeTimer = setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(() => onFinish(), 500);
+    }, 3500);
 
-  //   return () => {
-  //     clearTimeout(loadingTimer);
-  //     clearTimeout(closeTimer);
-  //   };
-  // }, [onFinish]);
+    return () => {
+      clearTimeout(loadingTimer);
+      clearTimeout(closeTimer);
+    };
+  }, [onFinish]);
 
   if (!isVisible) return null;
 
@@ -41,7 +41,8 @@ const SplashScreen = ({ onFinish }) => {
           <div className="logo-animation">
             <div className="logo-circle"></div>
             <div className="logo-icon">
-              <img src='/logo.png' width={100} height={100}/>
+              {/* ✅ Make sure logo.png is inside /public */}
+              <img src="/logo.png" width={100} height={100} alt="App Logo" />
             </div>
           </div>
           <h1 className="app-title">My Diary</h1>
